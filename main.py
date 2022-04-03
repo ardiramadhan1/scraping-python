@@ -1,6 +1,6 @@
 import re
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -14,8 +14,8 @@ PATH = r"C:\Users\user\Downloads\chromedriver.exe"
 
 @app.route('/detik/list')
 def detik():
-    query = 'Bandung'
-    page = 1
+    query = request.values.get('query')
+    page = request.values.get('page')
     driver = webdriver.Chrome(PATH)
     driver.get("https://www.detik.com/search/searchall?query={}&sortby=time&page={}".format(query, page))
     try:
@@ -47,6 +47,7 @@ def detik():
             })
         driver.quit()
         return jsonify({
+            'query': query,
             'data': rows
         })
     except Exception as e:
@@ -55,7 +56,7 @@ def detik():
 
 @app.route('/detik/content')
 def detik_content():
-    url = "https://news.detik.com/berita-jawa-barat/d-5900237/jelang-kedatangan-jokowi-ke-bandung-1421-personel-gabungan-disiagakan"
+    url = request.values.get('url')
     driver = webdriver.Chrome(PATH)
     driver.get("{}?single=1".format(url))
     try:
@@ -94,7 +95,7 @@ def bandung():
     driver = webdriver.Chrome(PATH)
     driver.get("https://www.liputan6.com")
     search = driver.find_element(By.NAME, "q")
-    search.send_keys("Bandung")
+    search.send_keys(request.values.get('query'))
     search.send_keys(Keys.RETURN)
     try:
         news = WebDriverWait(driver, 10).until(
@@ -138,7 +139,7 @@ def bandung():
 
 @app.route('/liputan6/content')
 def bandung_content():
-    url = "https://www.liputan6.com/regional/read/4883330/tamu-hotel-di-bandung-meninggal-terperosok-dari-lantai-3"
+    url = request.values.get('url')
     driver = webdriver.Chrome(PATH)
     driver.get(url)
     driver.execute_script("window.scrollBy(0,3000)","")
@@ -166,8 +167,8 @@ def bandung_content():
 
 @app.route('/cnn/list')
 def cnn_scrape():
-    query = 'Bandung'
-    page = 1
+    query = request.values.get('query')
+    page = request.values.get('page')
     driver = webdriver.Chrome(PATH)
     driver.get("https://www.cnnindonesia.com/search/?query={}&page={}".format(query, page))
     try:
@@ -206,8 +207,7 @@ def cnn_scrape():
 
 @app.route('/cnn/content')
 def cnn_content():
-    url = \
-        "https://www.cnnindonesia.com/gaya-hidup/20220314125331-277-770863/viral-kisah-nafa-salvana-dari-warung-pecel-lele-ke-milan-fashion-week"
+    url = request.values.get('url')
     driver = webdriver.Chrome(PATH)
     driver.get(format(url))
     try:
